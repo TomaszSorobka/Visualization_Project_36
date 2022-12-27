@@ -26,21 +26,23 @@ if __name__ == '__main__':
                         color_discrete_sequence=["fuchsia"], zoom=3, height=900, title='Listings basic map')
     fig3.update_layout(mapbox_style="open-street-map")
     fig3.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    fig3.show()
+    #fig3.show()
 
     fig4 = px.pie(aDb, values='1', names='host_identity_verified', title='Verified or not')
-    fig4.show()
+    #fig4.show()
 
 
-    fig5 = px.violin(aDb, y="price", x="room type", color="room type", box=True, points="all", title='Violin plot profitalibility analysis')
-    fig5.show()
+    # fig5 = px.violin(aDb, y="price", x="room type", color="room type", box=True, points="all", title='Violin plot profitalibility analysis')
+    # fig5.show()
 
-    fig6 = px.density_mapbox(crimeDb, lat='Latitude', lon='Longitude', radius=10,
-                        center=dict(lat=0, lon=180), zoom=3,
-                        mapbox_style="stamen-terrain", title='Crime heatmap')
-    fig6.show()
+    # fig6 = px.density_mapbox(crimeDb, lat='Latitude', lon='Longitude', radius=10,
+    #                     center=dict(lat=0, lon=180), zoom=3,
+    #                     mapbox_style="stamen-terrain", title='Crime heatmap')
+    # fig6.show()
     
-
+    reviewScatterplot = dcc.Graph(figure=fig2)
+    basicMap = dcc.Graph(figure=fig3)
+    verifiedPieChart = dcc.Graph(figure=fig4)
 
     app.layout = html.Div(
             id="app-container",
@@ -57,16 +59,25 @@ if __name__ == '__main__':
                     id="right-column",
                     className="nine columns",
                     children=[
-                        dcc.Graph(figure=fig2),
-                        dcc.Graph(figure=fig3),
-                        dcc.Graph(figure=fig4),
-                        dcc.Graph(figure=fig5),
-                        dcc.Graph(figure=fig6)
+                        reviewScatterplot,
+                        basicMap,
+                        verifiedPieChart,
+                        #dcc.Graph(figure=fig5),
+                        #dcc.Graph(figure=fig6)
                     ],
                 ),
             ],
         )
     # Define interactions
+    @app.callback(
+        Output(reviewScatterplot, "figure"), [
+        Input("select-color-scatter-1", "value"),
+        #Input(basicMap, 'selectedData')
+    ])
+    def update_scatter_1(selected_color):
+        return dcc.Graph(figure=fig2.update_traces(marker=dict(color=selected_color)))
+        #dcc.Graph(figure=px.scatter(aDb, x="review rate number", y="number of reviews", title='Review scatterplot', color=selected_color))
+
     # @app.callback(
     #     Output(scatterplot1.html_id, "figure"), [
     #     Input("select-color-scatter-1", "value"),
