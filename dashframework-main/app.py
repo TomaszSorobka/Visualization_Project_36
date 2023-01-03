@@ -66,6 +66,8 @@ if __name__ == '__main__':
 
                     dcc.Graph(id = "Map_2")
                 ], style= {"width": "33%", "display": "inline-block", "verticalAlign": "top"}), 
+                
+                #Visualizations
                 html.Div(
                 [
                    html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
@@ -113,13 +115,13 @@ if __name__ == '__main__':
     def output_figure (value):
         if (value is None):
             fig = px.density_mapbox(crimeDb, lat='Latitude', lon='Longitude', radius=1,
-                        center=dict(lat=40.7, lon=-73.9), zoom=8,
+                        center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="open-street-map", title='Crime heatmap')
             return fig
         else:
             dff = crimeDb[crimeDb['BORO_NM'].str.contains(''.join(value))]
             fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
-                        center=dict(lat=40.7, lon=-73.9), zoom=8,
+                        center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="open-street-map", title='Crime heatmap')
             return fig
 
@@ -141,7 +143,7 @@ if __name__ == '__main__':
         dff = airbnbDb[airbnbDb['price'] >= value]
         fig =  px.scatter_mapbox(data_frame = dff, lat = "lat", lon = "long", color = "room type",hover_name = dff['NAME'], hover_data={'room type': True, 'price': True, 'service fee': True,  'availability 365': True,
                 'review rate number': True,'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")  
-        fig.update_layout(legend = dict(title = "Room Type"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
+        fig.update_layout(legend = dict(title = "Room Type", itemclick = "toggleothers"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
         return fig
 
 app.run_server(debug=False, dev_tools_ui=False)
