@@ -37,6 +37,12 @@ if __name__ == '__main__':
                         center=dict(lat=0, lon=180), zoom=3,
                         mapbox_style="stamen-terrain", title='Crime heatmap')
 
+    coordinatesPlot = px.parallel_coordinates(airbnbDb, color="lat",
+                              dimensions=['Construction year', 'price', 'service fee',
+                                          'minimum nights', 'number of reviews', 'reviews per month', 'availability 365'],
+                              color_continuous_scale='balance',
+                              color_continuous_midpoint=40.80)
+
     
     
     reviewGraph = dcc.Graph(figure=reviewScatterplot)
@@ -44,6 +50,7 @@ if __name__ == '__main__':
     verifiedGraph = dcc.Graph(figure=verifiedPiechart)
     violinGraph = dcc.Graph(figure=violinPlot)
     crimeGraph = dcc.Graph(figure=crimeHeatmap)
+    coordinatesGraph = dcc.Graph(figure=coordinatesPlot)
 
 
     app.layout = html.Div(
@@ -66,7 +73,8 @@ if __name__ == '__main__':
                         verifiedGraph,
                         # Here there are not included because they make the whole app go very slow
                         #violinGraph,
-                        #crimeHeatmap
+                        #crimeHeatmap,
+                        coordinatesGraph
                     ],
                 ),
             ],
