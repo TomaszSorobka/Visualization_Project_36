@@ -15,8 +15,11 @@ from dash.dependencies import Input, Output, State
 if __name__ == '__main__':
 
     # Our data bases (I am using "processed" files because I made some small changes to those databases, I can send them to you if you want)
-    airbnbDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/airbnb_open_data_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    #airbnbDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/airbnb_open_data_processed.csv', low_memory=False)
+    #crimeDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
     
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
@@ -47,22 +50,6 @@ if __name__ == '__main__':
                     dcc.Dropdown(id='dropdown_verification', options=[
                     {'label': i, 'value': i} for i in airbnbDb['host_identity_verified'].unique()
                     ], multi=False, placeholder='Host Identity', style = {"width": "75%"}),
-
-
-    # coordinatesPlot = px.parallel_coordinates(airbnbDb, color="lat",
-    #                           dimensions=['Construction year', 'price', 'service fee',
-    #                                       'minimum nights', 'number of reviews', 'reviews per month', 'availability 365'],
-    #                           color_continuous_scale='balance',
-    #                           color_continuous_midpoint=40.80)
-
-    
-    
-    # reviewGraph = dcc.Graph(figure=reviewScatterplot)
-    # mapGraph = dcc.Graph(figure=mapScatter)
-    # verifiedGraph = dcc.Graph(figure=verifiedPiechart)
-    # violinGraph = dcc.Graph(figure=violinPlot)
-    # crimeGraph = dcc.Graph(figure=crimeHeatmap)
-    # coordinatesGraph = dcc.Graph(figure=coordinatesPlot)
                     html.Br(), 
 
                     html.H1(children = 'Display Crime Analytics',style = {"font-size": "20px"}),
@@ -79,49 +66,6 @@ if __name__ == '__main__':
                 html.Div(
                 [
                     html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
-
-        #         # Right column
-        #         html.Div(
-        #             id="right-column",
-        #             className="nine columns",
-        #             children=[
-        #                 reviewGraph,
-        #                 mapGraph,
-        #                 verifiedGraph,
-        #                 # Here there are not included because they make the whole app go very slow
-        #                 #violinGraph,
-        #                 #crimeHeatmap,
-        #                 coordinatesGraph
-        #             ],
-        #         ),
-        #     ],
-        # )
-    # Next task is to define the interactions
-    
-    # @app.callback(
-    #     Output(reviewGraph, "figure"), [
-    #     Input("select-color-scatter-1", "value"),
-    #     Input(mapGraph, 'selectedData')
-    # ])
-    # def update_scatter_1(selected_color):
-    #     return dcc.Graph(figure=reviewScatterplot.update_traces(marker=dict(color=selected_color)))
-        #dcc.Graph(figure=px.scatter(airbnbDb, x="review rate number", y="number of reviews", title='Review scatterplot', color=selected_color))
-
-    # @app.callback(
-    #     Output(scatterplot1.html_id, "figure"), [
-    #     Input("select-color-scatter-1", "value"),
-    #     Input(scatterplot2.html_id, 'selectedData')
-    # ])
-    # def update_scatter_1(selected_color, selected_data):
-    #     return scatterplot1.update(selected_color, selected_data)
-
-    # @app.callback(
-    #     Output(scatterplot2.html_id, "figure"), [
-    #     Input("select-color-scatter-2", "value"),
-    #     Input(scatterplot1.html_id, 'selectedData')
-    # ])
-    # def update_scatter_2(selected_color, selected_data):
-    #     return scatterplot2.update(selected_color, selected_data)
                     dcc.Graph(id = "Map"),
 
                     html.Br(),
@@ -139,7 +83,8 @@ if __name__ == '__main__':
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
-                    html.Div(id = 'x')
+                    html.Div(id = 'x'),
+                    dcc.Graph(id = "PcpGraph"),
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
             ])
@@ -217,6 +162,31 @@ if __name__ == '__main__':
         fig.update_layout(legend = dict(title = "Room Type", itemclick = "toggleothers"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
         return fig
 
+    #Pcp graph
+    @app.callback(
+        Output("PcpGraph", "figure"),
+        Input('dropdown_groups', 'value')
+    )
+    def output_figure(value):
+        dff = airbnbDb[airbnbDb['price'] >= value]
+        coordinatesPlot = px.parallel_coordinates(airbnbDb, color="lat",
+                              dimensions=['Construction year', 'price', 'service fee',
+                                          'minimum nights', 'number of reviews', 'reviews per month', 'availability 365'],
+                              color_continuous_scale='phase',
+                              color_continuous_midpoint=40.80)
+        return coordinatesPlot
+    
+    #Crime bar chart
+    @app.callback(
+        Output("CrimeBarchart", "figure"),
+        Input('dropdown_crimearea', 'value')
+    )
+    def output_figure(value):
+        dff = airbnbDb[airbnbDb['price'] >= value]
+ 
+        crimeBarchart = px.bar(fakeDb, x="neighbourhood", y=["felony", "violation", "misdemeanor"], title="Wide-Form Input")
+        return crimeBarchart
+
     #Display Crime Analytics
     @app.callback(
         Output('Crime', 'children'),
@@ -259,7 +229,8 @@ if __name__ == '__main__':
                             #Visualizations
                             html.Div(
                                 [
-                                    html.H1(children = 'Crime Distribution', style = {"font-size": "20px", "text-align": "center"})
+                                    html.H1(children = 'Crime Distribution', style = {"font-size": "20px", "text-align": "center"}),
+                                    dcc.Graph(id = "CrimeBarchart"),
                                 ], style = {"width": "40%", "display": "inline-block", "verticalAlign": "top"}
                             )
                         ])  
@@ -326,8 +297,10 @@ if __name__ == '__main__':
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     #dcc.Graph(id = "CrimeMap"),
                     dcc.Graph(id = "Violin"),
+                    
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
+                    dcc.Graph(id = "PcpGraph"),
                     html.Div(id = 'x')
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
