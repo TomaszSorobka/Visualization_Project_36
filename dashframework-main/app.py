@@ -49,6 +49,20 @@ if __name__ == '__main__':
                     ], multi=False, placeholder='Host Identity', style = {"width": "75%"}),
 
 
+    # coordinatesPlot = px.parallel_coordinates(airbnbDb, color="lat",
+    #                           dimensions=['Construction year', 'price', 'service fee',
+    #                                       'minimum nights', 'number of reviews', 'reviews per month', 'availability 365'],
+    #                           color_continuous_scale='balance',
+    #                           color_continuous_midpoint=40.80)
+
+    
+    
+    # reviewGraph = dcc.Graph(figure=reviewScatterplot)
+    # mapGraph = dcc.Graph(figure=mapScatter)
+    # verifiedGraph = dcc.Graph(figure=verifiedPiechart)
+    # violinGraph = dcc.Graph(figure=violinPlot)
+    # crimeGraph = dcc.Graph(figure=crimeHeatmap)
+    # coordinatesGraph = dcc.Graph(figure=coordinatesPlot)
                     html.Br(), 
 
                     html.H1(children = 'Display Crime Analytics',style = {"font-size": "20px"}),
@@ -66,6 +80,48 @@ if __name__ == '__main__':
                 [
                     html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
 
+        #         # Right column
+        #         html.Div(
+        #             id="right-column",
+        #             className="nine columns",
+        #             children=[
+        #                 reviewGraph,
+        #                 mapGraph,
+        #                 verifiedGraph,
+        #                 # Here there are not included because they make the whole app go very slow
+        #                 #violinGraph,
+        #                 #crimeHeatmap,
+        #                 coordinatesGraph
+        #             ],
+        #         ),
+        #     ],
+        # )
+    # Next task is to define the interactions
+    
+    # @app.callback(
+    #     Output(reviewGraph, "figure"), [
+    #     Input("select-color-scatter-1", "value"),
+    #     Input(mapGraph, 'selectedData')
+    # ])
+    # def update_scatter_1(selected_color):
+    #     return dcc.Graph(figure=reviewScatterplot.update_traces(marker=dict(color=selected_color)))
+        #dcc.Graph(figure=px.scatter(airbnbDb, x="review rate number", y="number of reviews", title='Review scatterplot', color=selected_color))
+
+    # @app.callback(
+    #     Output(scatterplot1.html_id, "figure"), [
+    #     Input("select-color-scatter-1", "value"),
+    #     Input(scatterplot2.html_id, 'selectedData')
+    # ])
+    # def update_scatter_1(selected_color, selected_data):
+    #     return scatterplot1.update(selected_color, selected_data)
+
+    # @app.callback(
+    #     Output(scatterplot2.html_id, "figure"), [
+    #     Input("select-color-scatter-2", "value"),
+    #     Input(scatterplot1.html_id, 'selectedData')
+    # ])
+    # def update_scatter_2(selected_color, selected_data):
+    #     return scatterplot2.update(selected_color, selected_data)
                     dcc.Graph(id = "Map"),
 
                     html.Br(),
