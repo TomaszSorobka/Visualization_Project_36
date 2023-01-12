@@ -85,6 +85,7 @@ if __name__ == '__main__':
                     dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
                     html.Div(id = 'x'),
                     dcc.Graph(id = "PcpGraph"),
+                    dcc.Graph(id = "BubblePlot"),
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
             ])
@@ -145,9 +146,11 @@ if __name__ == '__main__':
         Input("slider-position", "value")
     )
     def output_figure(profit):
-        fig = px.violin(airbnbDb, y="price", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
+        fig = px.violin(airbnbDb, y="revenue year", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
         fig.add_hline(y = profit, line_width = 3, line_dash = "dash", line_color = "black")
         fig.update_layout(legend = dict(title = "Room Type"))
+        fig.update_traces(opacity=0.5, selector=dict(type='violin'))
+        
         return fig
 
     #Second map (to be removed)
@@ -169,12 +172,24 @@ if __name__ == '__main__':
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
-        coordinatesPlot = px.parallel_coordinates(airbnbDb, color="lat",
-                              dimensions=['Construction year', 'price', 'service fee',
-                                          'minimum nights', 'number of reviews', 'reviews per month', 'availability 365'],
-                              color_continuous_scale='phase',
-                              color_continuous_midpoint=40.80)
+        coordinatesPlot = px.parallel_coordinates(airbnbDb, color="price",
+                              dimensions=['lat', 'Construction year', 'service fee', "room type",
+                                          'minimum nights', 'number of reviews', 'review rate number', 'availability 365'],
+                              color_continuous_scale='agsunset',
+                              color_continuous_midpoint=700)
         return coordinatesPlot
+
+
+    #Bubble plot
+    @app.callback(
+        Output("BubblePlot", "figure"),
+        Input('dropdown_groups', 'value')
+    )
+    def output_figure(value):
+        dff = airbnbDb[airbnbDb['price'] >= value]
+        bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews",
+	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20, range_x=['2013-01-01','2019-12-31'])
+        return bubblePlot
     
     #Crime bar chart
     @app.callback(
@@ -301,6 +316,7 @@ if __name__ == '__main__':
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
                     dcc.Graph(id = "PcpGraph"),
+                    dcc.Graph(id = "BubblePlot"),
                     html.Div(id = 'x')
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
