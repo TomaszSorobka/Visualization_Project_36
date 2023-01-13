@@ -17,9 +17,9 @@ if __name__ == '__main__':
     # Our data bases (I am using "processed" files because I made some small changes to those databases, I can send them to you if you want)
     #airbnbDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/airbnb_open_data_processed.csv', low_memory=False)
     #crimeDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
-    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
-    fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
+    airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
+    fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
     
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
@@ -99,28 +99,17 @@ if __name__ == '__main__':
     )
     def output_figure(area, identity):
         if (area is None) and (identity is None):
-            fig = px.scatter_mapbox(data_frame = airbnbDb, color = "host_identity_verified", color_discrete_sequence= ["blue", "green", "orange"], lat = "lat", lon = "long", hover_name = airbnbDb['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True, 'availability 365': True,  
-                'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
-            fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
-            return fig
+            dff = airbnbDb
         elif not(area is None) and (identity is None):
             dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area))]
-            fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-                'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
-            fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
-            return fig
         elif (area is None) and not(identity is None):
             dff = airbnbDb[airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
-            fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-                'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
-            fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
-            return fig
         else:
             dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area)) & airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
-            fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-                'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
-            fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
-            return fig
+        fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
+           'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
+        fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
+        return fig
 
     #Crime heatmap
     @app.callback(
@@ -246,7 +235,7 @@ if __name__ == '__main__':
                                 [
                                     html.H1(children = 'Crime Distribution', style = {"font-size": "20px", "text-align": "center"}),
                                     dcc.Graph(id = "CrimeBarchart"),
-                                ], style = {"width": "40%", "display": "inline-block", "verticalAlign": "top"}
+                                ], style = {"width": "40%", "display": "inline-block", "verticalAlign": "top", "float": "right"}
                             )
                         ])  
                        ]
