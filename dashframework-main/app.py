@@ -118,16 +118,13 @@ if __name__ == '__main__':
     )
     def output_figure (area):
         if (area is None):
-            fig = px.density_mapbox(crimeDb, lat='Latitude', lon='Longitude', radius=1,
-                        center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
-                        mapbox_style="open-street-map", title='Crime heatmap')
-            return fig
+            dff = crimeDb
         else:
             dff = crimeDb[crimeDb['BORO_NM'].str.contains(''.join(area))]
-            fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
+        fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
                         center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="open-street-map", title='Crime heatmap')
-            return fig
+        return fig
 
     #Violin figure
     @app.callback(
