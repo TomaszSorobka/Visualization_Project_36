@@ -15,11 +15,12 @@ from dash.dependencies import Input, Output, State
 if __name__ == '__main__':
 
     # Our data bases (I am using "processed" files because I made some small changes to those databases, I can send them to you if you want)
-    #airbnbDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/airbnb_open_data_processed.csv', low_memory=False)
-    #crimeDb = pd.read_csv('C:/Users/aliah/Documents/GitHub/Visualization_Project_36/dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
-    airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
-    fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
+    # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
+    # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
+    # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
+    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
     
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
@@ -115,8 +116,15 @@ if __name__ == '__main__':
         else:
             dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area)) & airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
         fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-           'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")
-        fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
+           'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron")
+        fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
+         mapbox=dict(
+                
+                #style="dark"
+                
+            ),)
+        fig.update_traces(marker_opacity=0.5, selector=dict(type='scattermapbox'))
+        
         return fig
 
     #Crime heatmap
@@ -143,7 +151,7 @@ if __name__ == '__main__':
         fig = px.violin(airbnbDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
         fig.add_hline(y = profit, line_width = 3, line_dash = "dash", line_color = "black")
         fig.update_layout(legend = dict(title = "Room Type"))
-        fig.update_traces(opacity=0.5, selector=dict(type='violin'))
+        fig.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
         
         return fig
 
@@ -168,7 +176,7 @@ if __name__ == '__main__':
         dff = airbnbDb[airbnbDb['price'] >= value]
         coordinatesPlot = px.parallel_coordinates(airbnbDb, color="price",
                               dimensions=['lat', 'Construction year', 'service fee', "room type",
-                                          'minimum nights', 'number of reviews', 'review rate number', 'availability 365'],
+                                         'number of reviews', 'review rate number', 'availability 365'],
                               color_continuous_scale='agsunset',
                               color_continuous_midpoint=700)
         return coordinatesPlot
@@ -181,7 +189,7 @@ if __name__ == '__main__':
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
-        bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews",
+        bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews", opacity = 0.5,
 	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20, range_x=['2013-01-01','2019-12-31'])
         return bubblePlot
     
