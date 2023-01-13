@@ -24,6 +24,13 @@ if __name__ == '__main__':
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
     airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('Not Specified')
+    airbnbDb['service fee'] = airbnbDb['service fee'].fillna(0)
+    airbnbDb['availability 365'] = airbnbDb['availability 365'].fillna(365)
+    airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('unconfirmed')
+    airbnbDb['Count'] = (365 - airbnbDb['availability 365'])
+    airbnbDb['Costs'] = airbnbDb.apply(lambda row: row['service fee']*row['Count'],axis=1)
+    airbnbDb['Revenue'] = airbnbDb.apply(lambda row: ((row['price'] + row['service fee'])*row['Count']),axis=1)
+    airbnbDb['Profit'] = airbnbDb['Revenue'] - airbnbDb['Costs']
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'brookln', 'neighbourhood group'] = 'Brooklyn'
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'manhatan', 'neighbourhood group'] = 'Manhattan'
     crimeDb['BORO_NM'] = crimeDb['BORO_NM'].fillna("Not Specified")
@@ -82,7 +89,7 @@ if __name__ == '__main__':
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
+                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
                     html.Div(id = 'x'),
                     dcc.Graph(id = "PcpGraph"),
                     dcc.Graph(id = "BubblePlot"),
@@ -132,7 +139,7 @@ if __name__ == '__main__':
         Input("slider-position", "value")
     )
     def output_figure(profit):
-        fig = px.violin(airbnbDb, y="revenue year", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
+        fig = px.violin(airbnbDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
         fig.add_hline(y = profit, line_width = 3, line_dash = "dash", line_color = "black")
         fig.update_layout(legend = dict(title = "Room Type"))
         fig.update_traces(opacity=0.5, selector=dict(type='violin'))
@@ -145,7 +152,7 @@ if __name__ == '__main__':
         Input("slider-position", "value")
     )
     def output_figure(profit):
-        dff = airbnbDb[airbnbDb['price'] >= profit]
+        dff = airbnbDb[airbnbDb['Profit'] >= profit]
         fig =  px.scatter_mapbox(data_frame = dff, lat = "lat", lon = "long", color = "room type",hover_name = dff['NAME'], hover_data={'room type': True, 'price': True, 'service fee': True,  'availability 365': True,
                 'review rate number': True,'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")  
         fig.update_layout(legend = dict(title = "Room Type", itemclick = "toggleothers"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
