@@ -27,6 +27,7 @@ if __name__ == '__main__':
     airbnbDb['service fee'] = airbnbDb['service fee'].fillna(0)
     airbnbDb['availability 365'] = airbnbDb['availability 365'].fillna(365)
     airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('unconfirmed')
+    airbnbDb['NAME'] = airbnbDb['NAME'].fillna('No Name')
     airbnbDb['Count'] = (365 - airbnbDb['availability 365'])
     airbnbDb['Costs'] = airbnbDb.apply(lambda row: row['service fee']*row['Count'],axis=1)
     airbnbDb['Revenue'] = airbnbDb.apply(lambda row: ((row['price'] + row['service fee'])*row['Count']),axis=1)
