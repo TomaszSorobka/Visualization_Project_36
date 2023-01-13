@@ -139,7 +139,7 @@ if __name__ == '__main__':
             dff = crimeDb[crimeDb['BORO_NM'].str.contains(''.join(area))]
         fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
                         center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
-                        mapbox_style="open-street-map", title='Crime heatmap')
+                        mapbox_style="carto-positron", title='Crime heatmap')
         return fig
 
     #Violin figure
