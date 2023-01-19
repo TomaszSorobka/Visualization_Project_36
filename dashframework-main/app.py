@@ -1,6 +1,7 @@
 from jbi100_app.main import app
 #from jbi100_app.views.menu import make_menu_layout
 #from jbi100_app.views.scatterplot import Scatterplot
+import plotly.graph_objects as go
 
 from dash import html, Input, Output
 from dash import dcc, State
@@ -21,6 +22,11 @@ if __name__ == '__main__':
     airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
     crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
     fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
+
+    filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
+    chosenDimensionsPcp = ['lat', 'Construction year', 'service fee', "room type",
+                                            'number of reviews', 'review rate number', 'availability 365']
+
     
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
@@ -36,7 +42,9 @@ if __name__ == '__main__':
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'brookln', 'neighbourhood group'] = 'Brooklyn'
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'manhatan', 'neighbourhood group'] = 'Manhattan'
     crimeDb['BORO_NM'] = crimeDb['BORO_NM'].fillna("Not Specified")
-    crimeDb.loc[crimeDb['BORO_NM'] == '(null)', 'BORO_NM'] = 'MANHATTAN'     
+    crimeDb.loc[crimeDb['BORO_NM'] == '(null)', 'BORO_NM'] = 'MANHATTAN'  
+
+    filteredDb = airbnbDb #[airbnbDb['lat'] >= 40.77482202742535] 
         
     app.layout = html.Div(
         [   html.Div(id = 'Crime'),
@@ -75,13 +83,14 @@ if __name__ == '__main__':
                 html.Div(
                 [
                     html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
-                    dcc.Graph(id = "Map"),
+                    dcc.Graph(id = "PcpGraph"),
+                    
 
                     html.Br(),
 
                     html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
-
-                    dcc.Graph(id = "Map_2"),
+                    dcc.Graph(id = "BubblePlot"),
+                    #dcc.Graph(id = "Map_2"),
                     html.Br(),
     
                 ], style= {"width": "33%", "display": "inline-block", "verticalAlign": "top"}), 
@@ -89,12 +98,13 @@ if __name__ == '__main__':
                 html.Div(
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
+                    dcc.Graph(id = "Map"),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
                     html.Div(id = 'x'),
-                    dcc.Graph(id = "PcpGraph"),
-                    dcc.Graph(id = "BubblePlot"),
+                    
+                    
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
             ])
@@ -174,23 +184,103 @@ if __name__ == '__main__':
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
+    #     fig = go.Figure(data=go.Parcoords(
+    #         line = dict(color = airbnbDb["price"],
+    #                     colorscale = 'agsunset',
+    #                     cmin = airbnbDb["price"].min(),
+    #                     cmax = airbnbDb["price"].max(),
+    #                     showscale = True),
+    #         dimensions = list([
+    #             dict(range = [airbnbDb["lat"].min(), airbnbDb["lat"].max()],
+    #                 label = 'lat', values = airbnbDb["lat"]),
+    #             dict(range = [airbnbDb["Construction year"].min(), airbnbDb["Construction year"].max()],
+    #                 label = 'Construction year', values = airbnbDb["Construction year"]),
+    #             dict(range = [airbnbDb["service fee"].min(), airbnbDb["service fee"].max()],
+    #                 label = 'service fee', values = airbnbDb["service fee"]),
+    #             # dict(
+    #             #     label = 'room type', values = airbnbDb["room type"]),
+    #             dict(range = [airbnbDb["number of reviews"].min(), airbnbDb["number of reviews"].max()],
+    #                 label = 'number of reviews', values = airbnbDb["number of reviews"]),
+    #             dict(range = [airbnbDb["review rate number"].min(), airbnbDb["review rate number"].max()],
+    #                 label = 'review rate number', values = airbnbDb["review rate number"]),
+    #             dict(range = [airbnbDb["availability 365"].min(), airbnbDb["availability 365"].max()],
+    #                 label = 'availability 365', values = airbnbDb["availability 365"])
+    #         ]),
+            
+    #     ))
+    #     # fig.update_traces(unselected_line_opacity=0.1, selector=dict(type='parcoords'))
+    #     return fig
+        
         coordinatesPlot = px.parallel_coordinates(airbnbDb, color="price",
-                              dimensions=['lat', 'Construction year', 'service fee', "room type",
-                                         'number of reviews', 'review rate number', 'availability 365'],
-                              color_continuous_scale='agsunset',
-                              color_continuous_midpoint=700)
+                                dimensions=chosenDimensionsPcp,
+                                color_continuous_scale='agsunset',
+                                color_continuous_midpoint=700)
+        coordinatesPlot.update_traces(unselected_line_opacity=0.1, selector=dict(type='parallelcoordinates'))
         return coordinatesPlot
 
+    
+    # @app.callback(
+    #     Output("BubblePlot", "figure"),
+    #     #Input("PcpGraph", "selectedData")
+    #     Input('dropdown_groups', 'value')
+        
+    # )
 
+    # def output_figure(value):
+    #     dff = airbnbDb[airbnbDb['price'] >= value]
+    #     bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews", opacity = 0.5,
+	#          size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2013-01-01','2019-12-31'])
+    #     bubblePlot.update_traces(marker_sizemin=100, selector=dict(type='scatter'))
+    #     return bubblePlot
+
+
+    # @app.callback(
+    #     Output("selected-range", "data"),
+    #     [Input("PcpGraph", "restyleData")]
+    # )
+    # def update_selected_range(selected_data):
+    #     print(selected_data)
+        # if selected_data:
+        #     selected_range = {}
+        #     for dimension in selected_data["dimensions"]:
+        #         selected_range[dimension["label"]] = dimension["constraintrange"]
+        # return selected_range
     #Bubble plot
+    def updateFiltering(filter):
+        if (filter != None):
+            dimensionNumber = int(list(filter[0])[0][11])
+            paramKey = list(filter[0])[0]
+            lowerLimit = filter[0][paramKey][0][0]
+            higherLimit = filter[0][paramKey][0][1]
+            filteringArray[dimensionNumber][0] = lowerLimit
+            filteringArray[dimensionNumber][1] = higherLimit
+
+            print(filteringArray[0][0])
+            print(filteringArray[dimensionNumber][1])
+            # print(paramKey)
+            # print(dimensionNumber)
+            applyFiltering()
+
+    #it kinda works but improve 
+    def applyFiltering():
+        global filteredDb
+        filteredDb = airbnbDb
+        i = 0
+        for x in chosenDimensionsPcp:
+            if (filteringArray[i][0] != None):
+                filteredDb = filteredDb[filteredDb[x] >= filteringArray[i][0]]
+                filteredDb = filteredDb[filteredDb[x] <= filteringArray[i][1]]
+                i+=1
+
     @app.callback(
         Output("BubblePlot", "figure"),
-        Input('dropdown_groups', 'value')
+        [Input('PcpGraph', 'restyleData')],
     )
     def output_figure(value):
-        dff = airbnbDb[airbnbDb['price'] >= value]
-        bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews", opacity = 0.5,
-	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20, range_x=['2013-01-01','2019-12-31'])
+        updateFiltering(value)
+        bubblePlot = px.scatter(filteredDb, x="last review", y="number of reviews", opacity = 0.5,
+	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2013-01-01','2019-12-31'])
+        bubblePlot.update_traces(marker_sizemin=3, selector=dict(type='scatter'))
         return bubblePlot
     
     #Crime bar chart
@@ -317,7 +407,8 @@ if __name__ == '__main__':
                     
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
-                    dcc.Graph(id = "PcpGraph"),
+                    #change the name
+                    dcc.Graph(id = "PcpGraph2"),
                     dcc.Graph(id = "BubblePlot"),
                     html.Div(id = 'x')
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
