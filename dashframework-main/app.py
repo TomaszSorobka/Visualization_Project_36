@@ -19,8 +19,8 @@ if __name__ == '__main__':
     # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
     # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
-    airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
+    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
     #fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
 
     filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
@@ -85,13 +85,13 @@ if __name__ == '__main__':
                 # Map
                 html.Div(
                 [
-                    html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
+                    html.H1(children='Filtering tool', style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "PcpGraph"),
                     
 
                     html.Br(),
 
-                    html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
+                    #html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
@@ -119,8 +119,9 @@ if __name__ == '__main__':
         Output("Map", "figure"),
         Input('dropdown_groups', 'value'), 
         Input('dropdown_verification', 'value'),
+        Input("slider-position", "value")
     )
-    def output_figure(area, identity):
+    def output_figure(area, identity, profit):
         if (area is None) and (identity is None):
             dff = airbnbDb
         elif not(area is None) and (identity is None):
@@ -129,6 +130,8 @@ if __name__ == '__main__':
             dff = airbnbDb[airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
         else:
             dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area)) & airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
+
+        dff = dff[dff['Profit'] >= profit]
         fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
            'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron")
         fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
@@ -330,14 +333,14 @@ if __name__ == '__main__':
         # else:
         #     filteredDb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area)) & filteredDb['host_identity_verified'].str.contains(''.join(identity))]
 
-        mapMain = px.scatter_mapbox(data_frame = filteredDb, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-           'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron") #hover_name = filteredDb['NAME']
-        mapMain.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
-         mapbox=dict(                
-            ),)
-        mapMain.update_traces(marker_opacity=0.5, selector=dict(type='scattermapbox'))
+        # mapMain = px.scatter_mapbox(data_frame = filteredDb, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
+        #    'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron") #hover_name = filteredDb['NAME']
+        # mapMain.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
+        #  mapbox=dict(                
+        #     ),)
+        # mapMain.update_traces(marker_opacity=0.5, selector=dict(type='scattermapbox'))
 
-        bubblePlot = px.scatter(filteredDb, x="last review", y="number of reviews", opacity = 0.5,
+        bubblePlot = px.scatter(filteredDb, x="last review", y="number of reviews", opacity = 0.5, title="Reviews analysis",
 	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2013-01-01','2019-12-31'])
         bubblePlot.update_traces(marker_sizemin=2, selector=dict(type='scatter'))
         return bubblePlot, violin
@@ -427,13 +430,13 @@ if __name__ == '__main__':
                 # Map
                 html.Div(
                 [
-                    html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
+                    html.H1(children='Filtering tool', style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "PcpGraph"),
                     
 
                     html.Br(),
 
-                    html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
+                    #html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
