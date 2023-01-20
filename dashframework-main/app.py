@@ -19,9 +19,9 @@ if __name__ == '__main__':
     # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
     # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
-    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
-    fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
+    airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
+    fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
 
     filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
     chosenDimensionsPcp = ['lat', 'Construction year', 'service fee', "room type",
@@ -361,7 +361,7 @@ if __name__ == '__main__':
                     html.H1(children='Filter Properties', style = {"font-size": "20px"}),
 
                     dcc.Dropdown(id='dropdown_groups', options=[
-                    {'label': i, 'value': i} for i in airbnbDb['neighbourhood group'].unique()
+                   {'label': i, 'value': i} for i in airbnbDb['neighbourhood group'].unique()
                     ], multi=False, placeholder='Choose Area', style = {"width": "75%"}),
 
                     html.Br(),
@@ -369,8 +369,6 @@ if __name__ == '__main__':
                     dcc.Dropdown(id='dropdown_verification', options=[
                     {'label': i, 'value': i} for i in airbnbDb['host_identity_verified'].unique()
                     ], multi=False, placeholder='Host Identity', style = {"width": "75%"}),
-
-
                     html.Br(), 
 
                     html.H1(children = 'Display Crime Analytics',style = {"font-size": "20px"}),
@@ -378,8 +376,8 @@ if __name__ == '__main__':
                         'Press',
                         id = 'reset',
                         n_clicks = 0,
-                        style = {"width": "50%", "text-align": "left"}
-                    ), 
+                        style = {"width": "55%", "text-align": "left"}
+                    ),
                     
                     html.Br(),
                 ], style = {"width": "17%", "display": "inline-block"}), 
@@ -387,14 +385,14 @@ if __name__ == '__main__':
                 html.Div(
                 [
                     html.H1(children='Location of Properties', style = {"font-size": "20px", "text-align": "center"}),
-
-                    dcc.Graph(id = "Map"),
+                    dcc.Graph(id = "PcpGraph"),
+                    
 
                     html.Br(),
 
                     html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
-
-                    dcc.Graph(id = "Map_2"),
+                    dcc.Graph(id = "BubblePlot"),
+                    #dcc.Graph(id = "Map_2"),
                     html.Br(),
     
                 ], style= {"width": "33%", "display": "inline-block", "verticalAlign": "top"}), 
@@ -402,15 +400,13 @@ if __name__ == '__main__':
                 html.Div(
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
-                    #dcc.Graph(id = "CrimeMap"),
+                    dcc.Graph(id = "Map"),
                     dcc.Graph(id = "Violin"),
-                    
                     html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['price'].min(), max=airbnbDb['price'].max(), value=airbnbDb['price'].min(), step=None),
-                    #change the name
-                    dcc.Graph(id = "PcpGraph2"),
-                    dcc.Graph(id = "BubblePlot"),
-                    html.Div(id = 'x')
+                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
+                    html.Div(id = 'x'),
+                    
+                    
                 ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
                 ),
             ]
