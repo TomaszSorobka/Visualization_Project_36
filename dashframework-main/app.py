@@ -166,7 +166,7 @@ if __name__ == '__main__':
             dff = crimeDb[crimeDb['LAW_CAT_CD'].isin(filtList) & crimeDb['BORO_NM'].isin(areaList)]
         
         fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=2.5,
-                        center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
+                        center=dict(lat=40.7, lon=-73.9), zoom=8.7, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="carto-positron", opacity = 0.9, title='Crime heatmap')
         fig.update_layout(title = "Crime Heatmap")
         return fig
@@ -365,22 +365,22 @@ if __name__ == '__main__':
                                     n_clicks = 0,
                                     style = {"width": "55%", "text-align": "left"}
                                     ),
-                                ], style = {"width": "17%", "display": "inline-block", "verticalAlign": "top"}
+                                ], style = {"width": "10%", "display": "inline-block", "verticalAlign": "top"}
                             ),
-                            
+                            html.Div(style = {"width": "1%", "display": "inline-block", "verticalAlign": "top"}),
                             #Crime Heatmap
                             html.Div(
                                 [
-                                    html.Div(children = [dcc.Graph(id = "CrimeMap")]),
-                                ], style = {"width": "35%", "display": "inline-block", "verticalAlign": "top"}
+                                    html.Div(children = [dcc.Graph(id = "CrimeMap", style={"width": "100vh", "height": "100vh"})]),
+                                ], style = {"width": "50%", "display": "inline-block", "verticalAlign": "top"}
                             ),
-
+                            html.Div(style = {"width": "1%", "display": "inline-block", "verticalAlign": "top"}),
                             #Visualizations
                             html.Div(
                                 [
                                     html.H1(children = 'Crime Distribution', style = {"font-size": "20px", "text-align": "center"}),
-                                    dcc.Graph(id = "CrimeBarchart"),
-                                ], style = {"width": "40%", "display": "inline-block", "verticalAlign": "top", "float": "right"}
+                                    dcc.Graph(id = "CrimeBarchart",style={"width": "100%", "height": "90vh"}),
+                                ], style = {"width": "38%", "display": "inline-block", "verticalAlign": "top", "float": "right"}
                             )
                         ])  
                        ]
