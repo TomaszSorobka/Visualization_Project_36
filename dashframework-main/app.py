@@ -62,13 +62,13 @@ if __name__ == '__main__':
 
                     dcc.Dropdown(id='dropdown_groups', options=[
                    {'label': i, 'value': i} for i in airbnbDb['neighbourhood group'].unique()
-                    ], multi=False, placeholder='Choose Area', style = {"width": "75%"}),
+                    ], multi=False, placeholder='Choose Area', style = {"width": "100%"}),
 
                     html.Br(),
 
                     dcc.Dropdown(id='dropdown_verification', options=[
                     {'label': i, 'value': i} for i in airbnbDb['host_identity_verified'].unique()
-                    ], multi=False, placeholder='Host Identity', style = {"width": "75%"}),
+                    ], multi=False, placeholder='Host Identity', style = {"width": "100%"}),
                     html.Br(), 
 
                     html.H1(children = 'Display Crime Analytics',style = {"font-size": "20px"}),
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                         'Press',
                         id = 'reset',
                         n_clicks = 0,
-                        style = {"width": "55%", "text-align": "left"}
+                        style = {"width": "90%", "text-align": "left"}
                     ),
                     
                     html.Br(),
@@ -363,7 +363,7 @@ if __name__ == '__main__':
                                     'Press',
                                     id = 'delete',
                                     n_clicks = 0,
-                                    style = {"width": "55%", "text-align": "left"}
+                                    style = {"width": "90%", "text-align": "left"}
                                     ),
                                 ], style = {"width": "10%", "display": "inline-block", "verticalAlign": "top"}
                             ),
@@ -404,13 +404,13 @@ if __name__ == '__main__':
 
                     dcc.Dropdown(id='dropdown_groups', options=[
                    {'label': i, 'value': i} for i in airbnbDb['neighbourhood group'].unique()
-                    ], multi=False, placeholder='Choose Area', style = {"width": "75%"}),
+                    ], multi=False, placeholder='Choose Area', style = {"width": "100%"}),
 
                     html.Br(),
 
                     dcc.Dropdown(id='dropdown_verification', options=[
                     {'label': i, 'value': i} for i in airbnbDb['host_identity_verified'].unique()
-                    ], multi=False, placeholder='Host Identity', style = {"width": "75%"}),
+                    ], multi=False, placeholder='Host Identity', style = {"width": "100%"}),
                     html.Br(), 
 
                     html.H1(children = 'Display Crime Analytics',style = {"font-size": "20px"}),
@@ -418,7 +418,7 @@ if __name__ == '__main__':
                         'Press',
                         id = 'reset',
                         n_clicks = 0,
-                        style = {"width": "55%", "text-align": "left"}
+                        style = {"width": "90%", "text-align": "left"}
                     ),
                     
                     html.Br(),
