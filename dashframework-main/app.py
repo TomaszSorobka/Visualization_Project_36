@@ -143,17 +143,51 @@ if __name__ == '__main__':
     #Crime heatmap
     @app.callback(
         Output("CrimeMap", "figure"),
-        Input('dropdown_crimearea', 'value')
+        Input('CrimeBarchart', 'selectedData')
     )
-    def output_figure (area):
-        if (area is None):
+    def output_figure (value):
+        if (value is None):
             dff = crimeDb
         else:
-            dff = crimeDb[crimeDb['BORO_NM'].str.contains(''.join(area))]
+            filtList = []
+            areaList = []
+            for i in range(len(value['points'])):
+                curveNumber = value['points'][i]['curveNumber']
+                group = value['points'][i]['x']
+                print(value['points'][i])
+                if (curveNumber == 0):
+                    crime = "FELONY"
+                elif (curveNumber == 1):
+                    crime = "MISDEMEANOR"
+                else:
+                    crime = "VIOLATION"
+                filtList.append(crime)
+                areaList.append(group)
+            dff = crimeDb[crimeDb['LAW_CAT_CD'].isin(filtList) & crimeDb['BORO_NM'].isin(areaList)]
+        
         fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
                         center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="carto-positron", title='Crime heatmap')
         return fig
+
+    #Crime bar chart
+    @app.callback(
+        Output("CrimeBarchart", "figure"),
+        Input('delete', 'n_clicks')
+    )
+    def output_figure(value):
+        df_stack = crimeDb.groupby(['BORO_NM', 'LAW_CAT_CD']).size().reset_index()
+        df_stack.columns = ['BORO_NM', 'LAW_CAT_CD', 'Counts']
+        crimeBarchart = px.bar(df_stack, x = 'BORO_NM', y = 'Counts', color = 
+                        'LAW_CAT_CD', barmode = 'stack', labels = 
+                                    {
+                                        "LAW_CAT_CD" : "Crime",
+                                        "BORO_NM" : "Area",
+                                        "Counts" : "Number of Crimes"
+                                    })
+        crimeBarchart.update_layout(title = 'Crime Distribution Per Area')
+        crimeBarchart.update_layout(clickmode='event+select')
+        return crimeBarchart    
 
     #Violin figure
     @app.callback(
@@ -286,24 +320,6 @@ if __name__ == '__main__':
         bubblePlot.update_traces(marker_sizemin=3, selector=dict(type='scatter'))
         return bubblePlot
     
-    #Crime bar chart
-    @app.callback(
-        Output("CrimeBarchart", "figure"),
-        Input('dropdown_crimearea', 'value')
-    )
-    def output_figure(value):
-        df_stack = crimeDb.groupby(['BORO_NM', 'LAW_CAT_CD']).size().reset_index()
-        df_stack.columns = ['BORO_NM', 'LAW_CAT_CD', 'Counts']
-        crimeBarchart = px.bar(df_stack, x = 'BORO_NM', y = 'Counts', color = 
-                        'LAW_CAT_CD', barmode = 'stack', labels = 
-                                    {
-                                        "BORO_NM" : "Area",
-                                        "LAW_CAT_CD" : "Crime",
-                                        "Counts" : "Number of Crimes"
-                                    })
-        crimeBarchart.update_layout(title = 'Crime Distribution Per Area')
-        return crimeBarchart
-
     #Display Crime Analytics
     @app.callback(
         Output('Crime', 'children'),
@@ -319,12 +335,6 @@ if __name__ == '__main__':
                             #Filtering
                             html.Div(
                                 [
-                                    html.H1(children= "Crime Heatmap", style = {"font-size": "20px", "text-align": "left"}),
-                    
-                                    dcc.Dropdown(id='dropdown_crimearea', options=[
-                                    {'label': i, 'value': i} for i in crimeDb['BORO_NM'].unique()
-                                    ], multi=False, placeholder='Area', style = {"width": "75%"}),
-
                                     html.H1(children = 'Hide Crime Analytics',style = {"font-size": "20px"}),
 
                                     html.Button(
