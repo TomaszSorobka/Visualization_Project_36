@@ -165,9 +165,10 @@ if __name__ == '__main__':
                 areaList.append(group)
             dff = crimeDb[crimeDb['LAW_CAT_CD'].isin(filtList) & crimeDb['BORO_NM'].isin(areaList)]
         
-        fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=1,
+        fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=3,
                         center=dict(lat=40.7, lon=-73.9), zoom=8, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
-                        mapbox_style="carto-positron", title='Crime heatmap')
+                        mapbox_style="carto-positron", opacity = 0.9, title='Crime heatmap')
+        fig.update_layout(title = "Crime Heatmap")
         return fig
 
     #Crime bar chart
