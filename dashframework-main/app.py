@@ -22,12 +22,14 @@ if __name__ == '__main__':
     airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
     crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
+    fullDb = pd.read_csv('C:/Users/aliah\Downloads/airbnb_open_data.csv')
 
     filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
     chosenDimensionsPcp = ['lat', 'Construction year', 'service fee', "room type",
                                             'number of reviews', 'review rate number', 'availability 365']
 
     
+    #print(fullDb[fullDb['neighbourhood group'] == 'Bronx']['neighbourhood'].nunique())
     # Processing of dataframes
     airbnbDb['neighbourhood group'] = airbnbDb['neighbourhood group'].fillna('Not Specified')
     airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('Not Specified')
@@ -291,8 +293,35 @@ if __name__ == '__main__':
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
- 
-        crimeBarchart = px.bar(fakeDb, x="neighbourhood", y=["felony", "violation", "misdemeanor"], title="Wide-Form Input")
+        numberQueensFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
+        numberQueensViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
+        numberQueensMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
+        
+        numberBronxFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')].count())
+        numberBronxViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
+        numberBronxMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
+
+        numberManhattanFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
+        numberManhattanViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
+        numberManhattanMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
+
+        numberBrooklynFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
+        numberBrooklynViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
+        numberBrooklynMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
+
+        numberStatenFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
+        numberStatenViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
+        numberStatenMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
+        
+        fakeDb['Felony'] = [numberQueensFelony, numberBronxFelony, numberBrooklynFelony, numberStatenFelony, numberManhattanFelony]
+        fakeDb['Violation'] = [numberQueensViolation, numberBronxViolation, numberBrooklynViolation, numberStatenViolation, numberManhattanViolation]
+        fakeDb['Misdemeanor'] = [numberQueensMisdemeanor, numberBronxMisdemeanor, numberBrooklynMisdemeanor, numberStatenMisdemeanor, numberManhattanMisdemeanor]
+        #print(numberBronxFelony)
+        crimeBarchart = px.bar(fakeDb, x="neighbourhood", y=["Felony", "Violation", "Misdemeanor"], labels={
+                     "neighbourhood": "Area",
+                     "value": "Number of crimes",
+                     "variable": "Crime"
+                 },title="Crime Distribution per Area")
         return crimeBarchart
 
     #Display Crime Analytics
