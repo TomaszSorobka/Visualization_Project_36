@@ -99,6 +99,7 @@ if __name__ == '__main__':
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
+                    html.Br(),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
@@ -401,6 +402,7 @@ if __name__ == '__main__':
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
+                    html.Br(),
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
