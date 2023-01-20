@@ -19,9 +19,9 @@ if __name__ == '__main__':
     # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
     # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
-    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
-    fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
+    airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
+    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
+    #fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
 
     filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
     cleanArray = [[], [], [], [], [], [], []]
@@ -80,7 +80,8 @@ if __name__ == '__main__':
                     ),
                     
                     html.Br(),
-                ], style = {"width": "17%", "display": "inline-block"}), 
+                ], style = {"width": "10%", "display": "inline-block"}), 
+                html.Div(style={"width": "1%", "display": "inline-block"}),
                 # Map
                 html.Div(
                 [
@@ -91,24 +92,24 @@ if __name__ == '__main__':
                     html.Br(),
 
                     html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
-                    dcc.Graph(id = "BubblePlot"),
+                    dcc.Graph(id = "Violin"),
+                    html.P("Profit Baseline", style = {"text-align": "left"}),
+                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
+                    html.Div(id = 'x'),
                     #dcc.Graph(id = "Map_2"),
                     html.Br(),
     
-                ], style= {"width": "33%", "display": "inline-block", "verticalAlign": "top"}), 
+                ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top"}),
+                html.Div(style={"width": "1%", "display": "inline-block"}), 
                 #Visualizations
                 html.Div(
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
                     html.Br(),
-                    dcc.Graph(id = "Violin"),
-                    html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
-                    html.Div(id = 'x'),
+                    dcc.Graph(id = "BubblePlot"),
                     
-                    
-                ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
+                ], style= {"width": "48%", "display": "inline-block", "verticalAlign": "top", "text-align": "center"}
                 ),
             ])
         ])
@@ -421,7 +422,8 @@ if __name__ == '__main__':
                     ),
                     
                     html.Br(),
-                ], style = {"width": "17%", "display": "inline-block"}), 
+                ], style = {"width": "10%", "display": "inline-block"}), 
+                html.Div(style={"width": "1%", "display": "inline-block"}),
                 # Map
                 html.Div(
                 [
@@ -432,24 +434,24 @@ if __name__ == '__main__':
                     html.Br(),
 
                     html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
-                    dcc.Graph(id = "BubblePlot"),
+                    dcc.Graph(id = "Violin"),
+                    html.P("Profit Baseline", style = {"text-align": "left"}),
+                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
+                    html.Div(id = 'x'),
                     #dcc.Graph(id = "Map_2"),
                     html.Br(),
     
-                ], style= {"width": "33%", "display": "inline-block", "verticalAlign": "top"}), 
+                ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top"}),
+                html.Div(style={"width": "1%", "display": "inline-block"}), 
                 #Visualizations
                 html.Div(
                 [
                     html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
                     html.Br(),
-                    dcc.Graph(id = "Violin"),
-                    html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
-                    html.Div(id = 'x'),
+                    dcc.Graph(id = "BubblePlot"),
                     
-                    
-                ], style= {"width": "40%", "display": "inline-block", "verticalAlign": "top", "text-align": "center", "float": "right"}
+                ], style= {"width": "48%", "display": "inline-block", "verticalAlign": "top", "text-align": "center"}
                 ),
             ]
             Crime.clear()
