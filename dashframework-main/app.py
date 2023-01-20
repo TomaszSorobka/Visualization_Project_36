@@ -292,36 +292,16 @@ if __name__ == '__main__':
         Input('dropdown_crimearea', 'value')
     )
     def output_figure(value):
-        dff = airbnbDb[airbnbDb['price'] >= value]
-        numberQueensFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
-        numberQueensViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
-        numberQueensMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('QUEENS') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
-        
-        numberBronxFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')].count())
-        numberBronxViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
-        numberBronxMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('BRONX') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
-
-        numberManhattanFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
-        numberManhattanViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
-        numberManhattanMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('MANHATTAN') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
-
-        numberBrooklynFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
-        numberBrooklynViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
-        numberBrooklynMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('BROOKLYN') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
-
-        numberStatenFelony = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('FELONY')])
-        numberStatenViolation = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('VIOLATION')])
-        numberStatenMisdemeanor = len(crimeDb[crimeDb['BORO_NM'].str.contains('STATEN ISLAND') & crimeDb['LAW_CAT_CD'].str.contains('MISDEMEANOR')])
-        
-        fakeDb['Felony'] = [numberQueensFelony, numberBronxFelony, numberBrooklynFelony, numberStatenFelony, numberManhattanFelony]
-        fakeDb['Violation'] = [numberQueensViolation, numberBronxViolation, numberBrooklynViolation, numberStatenViolation, numberManhattanViolation]
-        fakeDb['Misdemeanor'] = [numberQueensMisdemeanor, numberBronxMisdemeanor, numberBrooklynMisdemeanor, numberStatenMisdemeanor, numberManhattanMisdemeanor]
-        #print(numberBronxFelony)
-        crimeBarchart = px.bar(fakeDb, x="neighbourhood", y=["Felony", "Violation", "Misdemeanor"], labels={
-                     "neighbourhood": "Area",
-                     "value": "Number of crimes",
-                     "variable": "Crime"
-                 },title="Crime Distribution per Area")
+        df_stack = crimeDb.groupby(['BORO_NM', 'LAW_CAT_CD']).size().reset_index()
+        df_stack.columns = ['BORO_NM', 'LAW_CAT_CD', 'Counts']
+        crimeBarchart = px.bar(df_stack, x = 'BORO_NM', y = 'Counts', color = 
+                        'LAW_CAT_CD', barmode = 'stack', labels = 
+                                    {
+                                        "BORO_NM" : "Area",
+                                        "LAW_CAT_CD" : "Crime",
+                                        "Counts" : "Number of Crimes"
+                                    })
+        crimeBarchart.update_layout(title = 'Crime Distribution Per Area')
         return crimeBarchart
 
     #Display Crime Analytics
