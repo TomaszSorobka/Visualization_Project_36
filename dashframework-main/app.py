@@ -19,8 +19,8 @@ if __name__ == '__main__':
     # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
     # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
-    airbnbDb = pd.read_csv('dashframework-main/airbnb_10k_processed.csv', low_memory=False)
-    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    airbnbDb = pd.read_csv("C:/Users/aliah/Downloads/airbnb_open_data.csv", low_memory=False)
+    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
     #fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
 
     filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
@@ -35,6 +35,7 @@ if __name__ == '__main__':
     airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('Not Specified')
     airbnbDb['service fee'] = airbnbDb['service fee'].fillna(0)
     airbnbDb['availability 365'] = airbnbDb['availability 365'].fillna(365)
+    airbnbDb['reviews per month'] = airbnbDb['reviews per month'].fillna(0)
     airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('unconfirmed')
     airbnbDb['NAME'] = airbnbDb['NAME'].fillna('No Name')
     airbnbDb['Count'] = (365 - airbnbDb['availability 365'])
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'manhatan', 'neighbourhood group'] = 'Manhattan'
     crimeDb['BORO_NM'] = crimeDb['BORO_NM'].fillna("Not Specified")
     crimeDb.loc[crimeDb['BORO_NM'] == '(null)', 'BORO_NM'] = 'MANHATTAN'  
-
+    
     filteredDb = airbnbDb #[airbnbDb['lat'] >= 40.77482202742535] 
         
     app.layout = html.Div(
