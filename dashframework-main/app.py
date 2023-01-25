@@ -1,3 +1,4 @@
+import numpy as np
 from jbi100_app.main import app
 #from jbi100_app.views.menu import make_menu_layout
 #from jbi100_app.views.scatterplot import Scatterplot
@@ -15,21 +16,18 @@ from dash.dependencies import Input, Output, State
 
 if __name__ == '__main__':
 
-    # Our data bases (I am using "processed" files because I made some small changes to those databases, I can send them to you if you want)
-    # airbnbDb = pd.read_csv('./airbnb_10k_processed.csv', low_memory=False)
-    # crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
-    # fakeDb = pd.read_csv('./fakeCrimeData.csv', low_memory=False)
-    airbnbDb = pd.read_csv("C:/Users/aliah/Downloads/airbnb_open_data.csv", low_memory=False)
-    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
-    #fakeDb = pd.read_csv('dashframework-main/fakeCrimeData.csv', low_memory=False)
+    airbnbDb = pd.read_csv("dashframework-main/airbnb_open_data.csv", low_memory=True)
+    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
 
-    filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
-    cleanArray = [[], [], [], [], [], [], []]
-    chosenDimensionsPcp = ['lat', 'Construction year', 'service fee',
-                                            'number of reviews', 'review rate number', 'availability 365']
 
     
-    #print(fullDb[fullDb['neighbourhood group'] == 'Bronx']['neighbourhood'].nunique())
+    displayedPlots = False
+    previousValue = None
+    filteringArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
+    cleanArray = [[None, None], [None, None], [None, None], [None, None], [None, None], [None, None], [None, None]]
+    chosenDimensionsPcp = ['Profit', 'Construction year', 'service fee',
+                                            'number of reviews', 'review rate number', 'availability 365']
+
     # Processing of dataframes
     airbnbDb = airbnbDb.dropna()
     airbnbDb.drop(airbnbDb[airbnbDb['availability 365'] > 365].index, inplace= True)
@@ -41,6 +39,8 @@ if __name__ == '__main__':
     # airbnbDb['reviews per month'] = airbnbDb['reviews per month'].fillna(0)
     # airbnbDb['host_identity_verified'] = airbnbDb['host_identity_verified'].fillna('unconfirmed')
     # airbnbDb['NAME'] = airbnbDb['NAME'].fillna('No Name')
+    airbnbDb['last review'] = pd.to_datetime(airbnbDb["last review"])
+    airbnbDb['last review'] = pd.to_datetime(airbnbDb["last review"].dt.strftime('%Y-%m-%d'))
     airbnbDb['Count'] = (365 - airbnbDb['availability 365'])
     airbnbDb['Costs'] = airbnbDb.apply(lambda row: row['service fee']*row['Count'],axis=1)
     airbnbDb['Revenue'] = airbnbDb.apply(lambda row: ((row['price'] + row['service fee'])*row['Count']),axis=1)
@@ -49,8 +49,9 @@ if __name__ == '__main__':
     airbnbDb.loc[airbnbDb['neighbourhood group'] == 'manhatan', 'neighbourhood group'] = 'Manhattan'
     crimeDb['BORO_NM'] = crimeDb['BORO_NM'].fillna("Not Specified")
     crimeDb.loc[crimeDb['BORO_NM'] == '(null)', 'BORO_NM'] = 'MANHATTAN'  
+    tempDb = airbnbDb
     
-    filteredDb = airbnbDb #[airbnbDb['lat'] >= 40.77482202742535] 
+    filteredDb = airbnbDb 
         
     app.layout = html.Div(
         [   html.Div(id = 'Crime'),
@@ -95,7 +96,7 @@ if __name__ == '__main__':
 
                     html.Br(),
 
-                    #html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
+                    
                     dcc.Graph(id = "Violin"),
                     html.P("Profit Baseline", style = {"text-align": "left"}),
                     dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
@@ -118,35 +119,6 @@ if __name__ == '__main__':
             ])
         ])
     
-    #Map of properties
-    @app.callback(
-        Output("Map", "figure"),
-        Input('dropdown_groups', 'value'), 
-        Input('dropdown_verification', 'value'),
-        Input("slider-position", "value")
-    )
-    def output_figure(area, identity, profit):
-        if (area is None) and (identity is None):
-            dff = airbnbDb
-        elif not(area is None) and (identity is None):
-            dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area))]
-        elif (area is None) and not(identity is None):
-            dff = airbnbDb[airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
-        else:
-            dff = airbnbDb[airbnbDb['neighbourhood group'].str.contains(''.join(area)) & airbnbDb['host_identity_verified'].str.contains(''.join(identity))]
-
-        dff = dff[dff['Profit'] >= profit]
-        fig = px.scatter_mapbox(data_frame = dff, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_name = dff['NAME'], hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-           'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron")
-        fig.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
-         mapbox=dict(
-                
-                #style="dark"
-                
-            ),)
-        fig.update_traces(marker_opacity=0.5, selector=dict(type='scattermapbox'))
-        
-        return fig
 
     #Crime heatmap
     @app.callback(
@@ -172,10 +144,10 @@ if __name__ == '__main__':
                 filtList.append(crime)
             dff = crimeDb[crimeDb['LAW_CAT_CD'].isin(filtList) & crimeDb['BORO_NM'].isin(areaList)]
         
-        fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=2.5,
+        fig = px.density_mapbox(dff, lat='Latitude', lon='Longitude', radius=4,
                         center=dict(lat=40.7, lon=-73.9), zoom=8.7, hover_data= {'OFNS_DESC': True, 'PD_DESC': True},
                         mapbox_style="carto-positron", opacity = 0.9, title='Crime heatmap')
-        fig.update_layout(title = "Crime Heatmap")
+        fig.update_layout(title = "Crime Heatmap", dragmode='lasso')
         return fig
 
     #Crime bar chart
@@ -197,31 +169,6 @@ if __name__ == '__main__':
         crimeBarchart.update_layout(clickmode='event+select')
         return crimeBarchart    
 
-    #Violin figure
-    # @app.callback(
-    #     Output("Violin", "figure"),
-    #     Input("slider-position", "value")
-    # )
-    # def output_figure(profit):
-    #     fig = px.violin(airbnbDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
-    #     fig.add_hline(y = profit, line_width = 3, line_dash = "dash", line_color = "black")
-    #     fig.update_layout(legend = dict(title = "Room Type"))
-    #     fig.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
-        
-    #     return fig
-
-    #Second map (to be removed)
-    # @app.callback(
-    #     Output("Map_2", "figure"),
-    #     Input("slider-position", "value")
-    # )
-    # def output_figure(profit):
-    #     dff = airbnbDb[airbnbDb['Profit'] >= profit]
-    #     fig =  px.scatter_mapbox(data_frame = dff, lat = "lat", lon = "long", color = "room type",hover_name = dff['NAME'], hover_data={'room type': True, 'price': True, 'service fee': True,  'availability 365': True,
-    #             'review rate number': True,'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="open-street-map")  
-    #     fig.update_layout(legend = dict(title = "Room Type", itemclick = "toggleothers"), margin = {"r": 0, "l": 0, "t": 0,"b": 0})
-    #     return fig
-
     #Pcp graph
     @app.callback(
         Output("PcpGraph", "figure"),
@@ -229,32 +176,6 @@ if __name__ == '__main__':
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
-    #     fig = go.Figure(data=go.Parcoords(
-    #         line = dict(color = airbnbDb["price"],
-    #                     colorscale = 'agsunset',
-    #                     cmin = airbnbDb["price"].min(),
-    #                     cmax = airbnbDb["price"].max(),
-    #                     showscale = True),
-    #         dimensions = list([
-    #             dict(range = [airbnbDb["lat"].min(), airbnbDb["lat"].max()],
-    #                 label = 'lat', values = airbnbDb["lat"]),
-    #             dict(range = [airbnbDb["Construction year"].min(), airbnbDb["Construction year"].max()],
-    #                 label = 'Construction year', values = airbnbDb["Construction year"]),
-    #             dict(range = [airbnbDb["service fee"].min(), airbnbDb["service fee"].max()],
-    #                 label = 'service fee', values = airbnbDb["service fee"]),
-    #             # dict(
-    #             #     label = 'room type', values = airbnbDb["room type"]),
-    #             dict(range = [airbnbDb["number of reviews"].min(), airbnbDb["number of reviews"].max()],
-    #                 label = 'number of reviews', values = airbnbDb["number of reviews"]),
-    #             dict(range = [airbnbDb["review rate number"].min(), airbnbDb["review rate number"].max()],
-    #                 label = 'review rate number', values = airbnbDb["review rate number"]),
-    #             dict(range = [airbnbDb["availability 365"].min(), airbnbDb["availability 365"].max()],
-    #                 label = 'availability 365', values = airbnbDb["availability 365"])
-    #         ]),
-            
-    #     ))
-    #     # fig.update_traces(unselected_line_opacity=0.1, selector=dict(type='parcoords'))
-    #     return fig
         
         coordinatesPlot = px.parallel_coordinates(airbnbDb, color="price",
                                 dimensions=chosenDimensionsPcp,
@@ -263,25 +184,10 @@ if __name__ == '__main__':
         coordinatesPlot.update_traces(unselected_line_opacity=0.1, selector=dict(type='parallelcoordinates'))
         return coordinatesPlot
 
-    
-    # @app.callback(
-    #     Output("BubblePlot", "figure"),
-    #     #Input("PcpGraph", "selectedData")
-    #     Input('dropdown_groups', 'value')
-        
-    # )
-
-    # def output_figure(value):
-    #     dff = airbnbDb[airbnbDb['price'] >= value]
-    #     bubblePlot = px.scatter(airbnbDb, x="last review", y="number of reviews", opacity = 0.5,
-	#          size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2013-01-01','2019-12-31'])
-    #     bubblePlot.update_traces(marker_sizemin=100, selector=dict(type='scatter'))
-    #     return bubblePlot
-
     #Bubble plot
     def updateFiltering(filter):
         if (filter != None):
-            print(filter)
+            # print(filter)
             dimensionNumber = int(list(filter[0])[0][11])
             paramKey = list(filter[0])[0]
 
@@ -294,10 +200,6 @@ if __name__ == '__main__':
 
             filteringArray[dimensionNumber][0] = lowerLimit
             filteringArray[dimensionNumber][1] = higherLimit
-
-            print(filteringArray[dimensionNumber][0])
-            print(filteringArray[dimensionNumber][1])
-            # print(dimensionNumber)
             applyFiltering()
 
     #it kinda works but improve 
@@ -311,43 +213,98 @@ if __name__ == '__main__':
                 filteredDb = filteredDb[filteredDb[x] <= filteringArray[i][1]]
             i+=1
 
+    def resetFiltering():
+        global filteringArray
+        filteringArray = cleanArray
+
+
     @app.callback(
-        [Output("BubblePlot", "figure"),
-        #Output("Map", "figure"),
+        [
+        Output("BubblePlot", "figure"),
+        Output("Map", "figure"),
         Output("Violin", "figure")],
-        [Input('PcpGraph', 'restyleData')],
-        # Input('dropdown_groups', 'value'), 
-        # Input('dropdown_verification', 'value'),
+        Input('PcpGraph', 'restyleData'),
+        Input('BubblePlot', "selectedData"),
+        Input('Map', "selectedData"),
+        Input("original", "children"),
+        Input('dropdown_groups', 'value'), 
+        Input('dropdown_verification', 'value'),
     )
-    def output_figure(value): #, area, identity
+    def output_figure(value, bubblePoints, mapPoints, trigger, area, identity): #, area, identity
+        global previousValue
+        global displayedPlots
+        global tempDb
+        
+
+
         updateFiltering(value)
         global filteredDb
 
+
         violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
-        #fig.add_hline(y = profit, line_width = 3, line_dash = "dash", line_color = "black")
         violin.update_layout(legend = dict(title = "Room Type"))
         violin.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
 
-        # if (area is None) and (identity is None):
-        #     filteredDb = filteredDb
-        # elif not(area is None) and (identity is None):
-        #     filteredDb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area))]
-        # elif (area is None) and not(identity is None):
-        #     filteredDb  = filteredDb[filteredDb['host_identity_verified'].str.contains(''.join(identity))]
-        # else:
-        #     filteredDb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area)) & filteredDb['host_identity_verified'].str.contains(''.join(identity))]
+        if (area is None) and (identity is None):
+            tempDb = filteredDb
+        elif not(area is None) and (identity is None):
+            tempDb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area))]
+        elif (area is None) and not(identity is None):
+            tempDb  = filteredDb[filteredDb['host_identity_verified'].str.contains(''.join(identity))]
+        else:
+            tempDbb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area)) & filteredDb['host_identity_verified'].str.contains(''.join(identity))]
 
-        # mapMain = px.scatter_mapbox(data_frame = filteredDb, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
-        #    'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron") #hover_name = filteredDb['NAME']
-        # mapMain.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
-        #  mapbox=dict(                
-        #     ),)
-        # mapMain.update_traces(marker_opacity=0.5, selector=dict(type='scattermapbox'))
+        if value != previousValue or not displayedPlots:
+            bubblePlot = bubbleAssign()
+            mapMain = mapAssign()
 
+            displayedPlots = True
+            #print('changed')
+        else:
+            if (bubblePoints is not None and mapPoints is None):
+                mapMain = mapAssign()
+                bubblePlot = None
+                selected_points = [point['pointNumber'] for point in bubblePoints.get('points', [])]
+                #print(selected_points)
+                mapMain.update_traces(selectedpoints=selected_points, selector=dict(type='scattermapbox'))
+                #print('map should be highlighted')
+            elif (bubblePoints is None and mapPoints is not None):
+                bubblePlot = bubbleAssign()
+                mapMain = None
+                # 
+                selected_points = [point['pointNumber'] for point in mapPoints.get('points', [])]
+                #print(selected_points)
+                bubblePlot.update_traces(selectedpoints=selected_points)
+                #print('scatter should be highlighted')
+            else:
+                bubblePlot = bubbleAssign()
+                mapMain = mapAssign()
+                displayedPlots = False
+                #print('niedozwolone') #do reset
+                #output_figure(previousValue, None, None, None, )
+                
+
+
+        previousValue = value
+        return bubblePlot, mapMain, violin
+
+
+    def mapAssign():
+        mapMain = px.scatter_mapbox(data_frame = tempDb, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
+        'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron", zoom = 9) #hover_name = filteredDb['NAME']
+        mapMain.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
+        mapbox=dict(                
+            ), dragmode='lasso')
+        mapMain.update_traces(marker_opacity=0.2, selected_marker_opacity=1, unselected_marker_opacity=0.01, selector=dict(type='scattermapbox'))
+        return mapMain
+
+    def bubbleAssign():
         bubblePlot = px.scatter(filteredDb, x="last review", y="number of reviews", opacity = 0.5, title="Reviews analysis",
-	         size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2013-01-01','2019-12-31'])
-        bubblePlot.update_traces(marker_sizemin=2, selector=dict(type='scatter'))
-        return bubblePlot, violin
+            size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2015-01-01','2019-12-31'])
+
+        bubblePlot.update_traces(marker_sizemin=8,selected_marker_opacity=1,unselected_marker_opacity=0.005)
+        bubblePlot.update_layout(dragmode='lasso')
+        return bubblePlot
     
     #Display Crime Analytics
     @app.callback(
@@ -402,6 +359,9 @@ if __name__ == '__main__':
         State('Crime', 'children')
     )
     def hide(n_clicks, Original, Crime):
+        resetFiltering()
+        global displayedPlots
+        displayedPlots = False
         if n_clicks > 0:
             Original = [   
                 # Filtering Map
