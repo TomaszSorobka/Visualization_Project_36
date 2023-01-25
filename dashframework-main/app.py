@@ -16,8 +16,8 @@ from dash.dependencies import Input, Output, State
 
 if __name__ == '__main__':
 
-    airbnbDb = pd.read_csv("dashframework-main/airbnb_open_data.csv", low_memory=True)
-    crimeDb = pd.read_csv('dashframework-main/NYPD_Complaint_processed.csv', low_memory=False)
+    airbnbDb = pd.read_csv("./airbnb_open_data.csv", low_memory=True)
+    crimeDb = pd.read_csv('./NYPD_Complaint_processed.csv', low_memory=False)
 
 
     
@@ -98,8 +98,8 @@ if __name__ == '__main__':
 
                     
                     dcc.Graph(id = "Violin"),
-                    html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
+                    #html.P("Profit Baseline", style = {"text-align": "left"}),
+                    #dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
                     html.Div(id = 'x'),
                     #dcc.Graph(id = "Map_2"),
                     html.Br(),
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 #Visualizations
                 html.Div(
                 [
-                    html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
+                    html.H1(children= "Location of Properties", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
                     html.Br(),
                     dcc.Graph(id = "BubblePlot"),
@@ -252,7 +252,7 @@ if __name__ == '__main__':
         elif (area is None) and not(identity is None):
             tempDb  = filteredDb[filteredDb['host_identity_verified'].str.contains(''.join(identity))]
         else:
-            tempDbb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area)) & filteredDb['host_identity_verified'].str.contains(''.join(identity))]
+            tempDb  = filteredDb[filteredDb['neighbourhood group'].str.contains(''.join(area)) & filteredDb['host_identity_verified'].str.contains(''.join(identity))]
 
         if value != previousValue or not displayedPlots:
             bubblePlot = bubbleAssign()
@@ -402,8 +402,8 @@ if __name__ == '__main__':
 
                     #html.H1(children='Properties based on profit', style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Violin"),
-                    html.P("Profit Baseline", style = {"text-align": "left"}),
-                    dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
+                    #html.P("Profit Baseline", style = {"text-align": "left"}),
+                    #dcc.Slider( id='slider-position', min=airbnbDb['Profit'].min(), max=airbnbDb['Profit'].max(), value=airbnbDb['Profit'].min(), step=None),
                     html.Div(id = 'x'),
                     #dcc.Graph(id = "Map_2"),
                     html.Br(),
@@ -413,7 +413,7 @@ if __name__ == '__main__':
                 #Visualizations
                 html.Div(
                 [
-                    html.H1(children= "Visualizations", style = {"font-size": "20px", "text-align": "center"}),
+                    html.H1(children= "Location of Properties", style = {"font-size": "20px", "text-align": "center"}),
                     dcc.Graph(id = "Map"),
                     html.Br(),
                     dcc.Graph(id = "BubblePlot"),
