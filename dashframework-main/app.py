@@ -50,7 +50,6 @@ if __name__ == '__main__':
     crimeDb['BORO_NM'] = crimeDb['BORO_NM'].fillna("Not Specified")
     crimeDb.loc[crimeDb['BORO_NM'] == '(null)', 'BORO_NM'] = 'MANHATTAN'  
     tempDb = airbnbDb
-    
     filteredDb = airbnbDb 
         
     app.layout = html.Div(
@@ -83,8 +82,19 @@ if __name__ == '__main__':
                         n_clicks = 0,
                         style = {"width": "90%", "text-align": "left"}
                     ),
-                    
+
                     html.Br(),
+                    html.H1(children = 'Reset filtering tool',style = {"font-size": "20px"}),
+                    
+                    html.A(html.Button('Reset', n_clicks = 0, style = {"width": "90%", "text-align": "left"}),href='/'),
+                    html.Br(),
+                    html.H1(children = 'Reset Visualizations',style = {"font-size": "20px"}),
+                    html.Button(
+                        'Reset',
+                        id = 'undo',
+                        n_clicks = 0,
+                        style = {"width": "90%", "text-align": "left"}
+                    ),
                 ], style = {"width": "10%", "display": "inline-block"}), 
                 html.Div(style={"width": "1%", "display": "inline-block"}),
                 # Map
@@ -169,10 +179,10 @@ if __name__ == '__main__':
         crimeBarchart.update_layout(clickmode='event+select')
         return crimeBarchart    
 
-    #Pcp graph
+#   Pcp graph
     @app.callback(
         Output("PcpGraph", "figure"),
-        Input('dropdown_groups', 'value')
+        Input('dropdown_groups', 'value'),
     )
     def output_figure(value):
         dff = airbnbDb[airbnbDb['price'] >= value]
@@ -182,7 +192,9 @@ if __name__ == '__main__':
                                 color_continuous_scale='agsunset',
                                 color_continuous_midpoint=700)
         coordinatesPlot.update_traces(unselected_line_opacity=0.1, selector=dict(type='parallelcoordinates'))
+        
         return coordinatesPlot
+       
 
     #Bubble plot
     def updateFiltering(filter):
@@ -215,7 +227,11 @@ if __name__ == '__main__':
 
     def resetFiltering():
         global filteringArray
+        global filteredDb
+        global tempDb
         filteringArray = cleanArray
+        filteredDb = airbnbDb
+        tempDb = filteredDb
 
 
     @app.callback(
@@ -223,24 +239,22 @@ if __name__ == '__main__':
         Output("BubblePlot", "figure"),
         Output("Map", "figure"),
         Output("Violin", "figure")],
+        Output("undo", "n_clicks"),
         Input('PcpGraph', 'restyleData'),
         Input('BubblePlot', "selectedData"),
         Input('Map', "selectedData"),
         Input("original", "children"),
         Input('dropdown_groups', 'value'), 
         Input('dropdown_verification', 'value'),
+        Input("undo", "n_clicks"),
     )
-    def output_figure(value, bubblePoints, mapPoints, trigger, area, identity): #, area, identity
+    def output_figure(value, bubblePoints, mapPoints, trigger, area, identity, clicks): #, area, identity
         global previousValue
         global displayedPlots
         global tempDb
         
-
-
         updateFiltering(value)
         global filteredDb
-
-
         violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
         violin.update_layout(legend = dict(title = "Room Type"))
         violin.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
@@ -284,9 +298,19 @@ if __name__ == '__main__':
                 #output_figure(previousValue, None, None, None, )
                 
 
-
+        if (clicks > 0):
+            print(1)
+            resetFiltering()
+            displayedPlots = False
+            mapMain = mapAssign()
+            bubblePlot = bubbleAssign()
+            violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
+            violin.update_layout(legend = dict(title = "Room Type"))
+            violin.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
+            clicks = 0
+            return bubblePlot, mapMain, violin, clicks
         previousValue = value
-        return bubblePlot, mapMain, violin
+        return bubblePlot, mapMain, violin, clicks
 
 
     def mapAssign():
@@ -359,9 +383,6 @@ if __name__ == '__main__':
         State('Crime', 'children')
     )
     def hide(n_clicks, Original, Crime):
-        resetFiltering()
-        global displayedPlots
-        displayedPlots = False
         if n_clicks > 0:
             Original = [   
                 # Filtering Map
@@ -387,8 +408,19 @@ if __name__ == '__main__':
                         n_clicks = 0,
                         style = {"width": "90%", "text-align": "left"}
                     ),
-                    
                     html.Br(),
+                    html.H1(children = 'Reset filtering tool',style = {"font-size": "20px"}),
+                    
+                    html.A(html.Button('Reset', n_clicks = 0, style = {"width": "90%", "text-align": "left"}),href='/'),
+                    html.Br(),
+                    html.H1(children = 'Reset Visualizations',style = {"font-size": "20px"}),
+                    html.Button(
+                        'Reset',
+                        id = 'undo',
+                        n_clicks = 0,
+                        style = {"width": "90%", "text-align": "left"}
+                    ),
+                    html.Br()
                 ], style = {"width": "10%", "display": "inline-block"}), 
                 html.Div(style={"width": "1%", "display": "inline-block"}),
                 # Map
@@ -423,5 +455,22 @@ if __name__ == '__main__':
             ]
             Crime.clear()
             return Original
-
+    # @app.callback(
+    #     Output("undo", "n_clicks"),
+    #     Input("undo", "n_clicks")
+    # )
+    # def undo(value):
+    #     global x
+    #     if (value > 0):
+    #         x += 1
+    #         print(x)
+    #         return value
+    # @app.callback(
+    # Output('undo', 'n_clicks'),
+    # [Input('url', 'pathname'),
+    #  Input('undo', 'n_clicks')]
+    # )
+    # def display_page(relative_pathname, value):
+    #     if value > 1:
+            
 app.run_server(debug=False, dev_tools_ui=False)
