@@ -174,7 +174,7 @@ if __name__ == '__main__':
                                         "LAW_CAT_CD" : "Crime",
                                         "BORO_NM" : "Area",
                                         "Counts" : "Number of Crimes"
-                                    })
+                                    }, color_discrete_sequence= ["green", "purple", "orange"])
         crimeBarchart.update_layout(title = 'Crime Distribution Per Area')
         crimeBarchart.update_layout(clickmode='event+select')
         return crimeBarchart    
@@ -255,8 +255,9 @@ if __name__ == '__main__':
         
         updateFiltering(value)
         global filteredDb
-        violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
+        violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis', color_discrete_sequence= ["purple", "green", "orange", "yellow"])
         violin.update_layout(legend = dict(title = "Room Type"))
+        violin.update_layout(xaxis_title = "Room Type", xaxis_showticklabels=False)
         violin.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
 
         if (area is None) and (identity is None):
@@ -304,7 +305,7 @@ if __name__ == '__main__':
             displayedPlots = False
             mapMain = mapAssign()
             bubblePlot = bubbleAssign()
-            violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis')
+            violin = px.violin(filteredDb, y="Profit", x="room type", color="room type", box=True, points="all", title='Profitalibility analysis', color_discrete_sequence= ["purple", "green", "orange", "yellow"])
             violin.update_layout(legend = dict(title = "Room Type"))
             violin.update_traces(marker_opacity=0.05, selector=dict(type='violin'))
             clicks = 0
@@ -314,14 +315,14 @@ if __name__ == '__main__':
 
 
     def mapAssign():
-        mapMain = px.scatter_mapbox(data_frame = tempDb, color = "host_identity_verified",color_discrete_sequence= ["blue", "green", "orange"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
+        mapMain = px.scatter_mapbox(data_frame = tempDb, color = "host_identity_verified",color_discrete_sequence= ["orange", "green"],lat = "lat", lon = "long", hover_data={'room type': True,'review rate number': True, 'price': True, 'service fee': True,  'availability 365': True,
         'host_identity_verified': True,'lat': False, 'long': False}, mapbox_style="carto-positron", zoom = 9) #hover_name = filteredDb['NAME']
         mapMain.update_layout(legend = dict(title = "Host Identity"), margin = {"r": 0, "l": 0, "t": 0,"b": 0},
         mapbox=dict(                
             ), dragmode='lasso')
-        mapMain.update_traces(marker_opacity=0.2, selected_marker_opacity=1, unselected_marker_opacity=0.01, selector=dict(type='scattermapbox'))
+        mapMain.update_traces(marker_opacity=0.8, selected_marker_opacity=1,  selector=dict(type='scattermapbox'))
         return mapMain
-
+#unselected_marker_opacity=0.01,
     def bubbleAssign():
         bubblePlot = px.scatter(filteredDb, x="last review", y="number of reviews", opacity = 0.5, title="Reviews analysis",
             size="reviews per month", color="review rate number", hover_name="neighbourhood", log_x=False, size_max=20,range_x=['2015-01-01','2019-12-31'])
